@@ -1,15 +1,15 @@
+import React from 'react';
 import css from './Filter.module.css';
 import PropTypes from 'prop-types';
 
 export const Filter = ({ filter, setFilter }) => {
-  // filter names using keyword
   const handleFilterChange = e => {
     setFilter(e.target.value);
   };
 
   return (
-    <div className={css.filter}>
-      <p className={css.filterHeader}>Find Contacts by Name</p>
+    <div className={css.divFilter}>
+      <p>Find Contacts by Name</p>
       <input
         type="text"
         name="filter"
