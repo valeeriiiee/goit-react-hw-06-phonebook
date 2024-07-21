@@ -21,3 +21,5 @@ ContactList.propTypes = {
   filterContact: PropTypes.func.isRequired,
   deleteContact: PropTypes.func.isRequired,
 };
+
+export default ContactList;
