@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { nanoid } from 'nanoid';
 import css from './ContactForm.module.css';
 import PropTypes from 'prop-types';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-const ContactForm = ({ addContact, contacts }) => {
+// for form applications
+// its best to keep the state within the local component
+export const ContactForm = ({ addContact, contacts }) => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
@@ -22,20 +25,18 @@ const ContactForm = ({ addContact, contacts }) => {
       return;
     }
 
-    const existingContactName = contacts.find(
+    const existingContact = contacts.find(
       contact => contact.name.toLowerCase() === name.toLowerCase()
     );
-    if (existingContactName) {
-      alert(`${name} is already in contacts`);
+    if (existingContact) {
+      Notify.failure(`${name} is already in your contacts!`, {
+        position: 'center-top',
+      });
       return;
-    }
-
-    const existingContactNumber = contacts.find(
-      contact => contact.number === number
-    );
-    if (existingContactNumber) {
-      alert(`The number ${number} is already in contacts`);
-      return;
+    } else {
+      Notify.success(`${name} is successfully added to your contacts!`, {
+        position: 'center-top',
+      });
     }
 
     addContact({
@@ -49,21 +50,22 @@ const ContactForm = ({ addContact, contacts }) => {
   };
 
   return (
-    <form className={css.contactForm} onSubmit={handleSubmit}>
-      <label className={css.formInput}>
-        <p className={css.formHeader}>Name</p>
+    <form className={css.form} onSubmit={handleSubmit}>
+      <label className={css.formField}>
+        <p className={css.formLabel}>Name</p>
         <input
           type="text"
           name="name"
-          pattern="^[a-zA-Zа-яА-Я]+(([' \-][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+          pattern="^[a-zA-Za-яА-Я]+(([' \-][a-zA-Za-яА-Я ])?[a-zA-Za-яА-Я]*)*$"
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan."
           required
           value={name}
           onChange={handleNameChange}
         />
       </label>
-      <label className={css.formInput}>
-        <p className={css.formHeader}>Number</p>
+
+      <label className={css.formField}>
+        <p className={css.formLabel}>Number</p>
         <input
           type="tel"
           name="number"
@@ -74,7 +76,7 @@ const ContactForm = ({ addContact, contacts }) => {
           onChange={handleNumberChange}
         />
       </label>
-      <button className={css.contactFormButton} type="submit">
+      <button className={css.btnSubmit} type="submit">
         Add Contact
       </button>
     </form>
@@ -89,7 +91,5 @@ ContactForm.propTypes = {
       name: PropTypes.string.isRequired,
       number: PropTypes.string.isRequired,
     })
-  ).isRequired,
+  ),
 };
-
-export default ContactForm;
