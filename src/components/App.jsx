@@ -1,57 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import ContactForm from './ContactForm/ContactForm';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { addContact, deleteContact, setFilter } from '../redux/actions';
+import { getContacts, getFilter } from '../redux/selectors';
+import { ContactForm } from './ContactForm/ContactForm';
 import { ContactList } from './ContactList/ContactList';
 import { Filter } from './Filter/Filter';
 
-const App = () => {
-  const initialContacts = [
+const retrieveInitialContacts = () => {
+  const savedContacts = JSON.parse(localStorage.getItem('contacts'));
+  if (savedContacts && savedContacts.length > 0) {
+    return savedContacts;
+  }
+  console.log('Using default contacts');
+  return [
     { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
     { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
     { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
     { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
   ];
+};
 
-  const [contacts, setContacts] = useState(initialContacts);
-  const [filter, setFilter] = useState('');
+export const App = () => {
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const savedContacts = localStorage.getItem('contacts');
-    if (savedContacts !== null) {
-      setContacts(JSON.parse(savedContacts));
-    }
-  }, []);
+    const initialContacts = retrieveInitialContacts();
+    initialContacts.forEach(contact => dispatch(addContact(contact)));
+  }, [dispatch]);
 
   useEffect(() => {
     localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
 
-  const addContact = newContact => {
-    setContacts(prevContacts => [...prevContacts, newContact]);
+  const handleAddContact = newContact => {
+    const duplicateContact = contacts.find(
+      contact => contact.name === newContact.name
+    );
+
+    if (duplicateContact) {
+      alert(`${newContact.name} is already in your contacts.`);
+      return;
+    }
+
+    dispatch(addContact(newContact));
   };
 
-  const deleteContact = id => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== id)
-    );
+  const handleDeleteContact = id => {
+    dispatch(deleteContact(id));
+  };
+
+  const handleSetFilter = newFilter => {
+    dispatch(setFilter(newFilter));
   };
 
   const filterContact = () => {
-    const filterLowerCase = filter.toLowerCase();
     return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filterLowerCase)
+      contact.name.toLowerCase().includes(filter.toLowerCase())
     );
   };
 
   return (
     <div>
       <h1>Phonebook</h1>
-      <ContactForm addContact={addContact} contacts={contacts} />
+      <ContactForm addContact={handleAddContact} contacts={contacts} />
 
       <h2>Contacts</h2>
-      <Filter filter={filter} setFilter={setFilter} />
+      <Filter filter={filter} setFilter={handleSetFilter} />
       <ContactList
         filterContact={filterContact}
-        deleteContact={deleteContact}
+        deleteContact={handleDeleteContact}
       />
     </div>
   );
